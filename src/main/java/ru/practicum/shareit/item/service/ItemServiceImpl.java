@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class ItemServiceImpl implements ItemService {
     private final ItemDao itemDao;
     private final UserServiceImpl userService;
-    private final Integer AMMOUNT_OF_USERS = 1;
+    private final Integer USERS = 1;
 
     @Override
     public List<ItemDto> findAllByOwner(Integer ownerId) {
@@ -65,7 +65,7 @@ public class ItemServiceImpl implements ItemService {
 
         if (!existing.getOwner().equals(user.getId())) {
             List<Item> sameItems = itemDao.findAllByOwner(ownerId);
-            if (sameItems.size() > AMMOUNT_OF_USERS) {
+            if (sameItems.size() > USERS) {
                 existing = findItemByOwner(sameItems, ownerId);
             }
         }
