@@ -30,10 +30,10 @@ public class ItemDaoImpl implements ItemDao {
     @Override
     public Item update(Item item) {
         for (Map.Entry<Integer, List<Item>> entry : items.entrySet()) {
-            List<Item> list = entry.getValue();
-            for (int i = 0; i < list.size(); i++) {
-                if (list.get(i).getId().equals(item.getId())) {
-                    list.set(i, item);
+            List<Item> itemList = entry.getValue();
+            for (int i = 0; i < itemList.size(); i++) {
+                if (itemList.get(i).getId().equals(item.getId())) {
+                    itemList.set(i, item);
                     return item;
                 }
             }

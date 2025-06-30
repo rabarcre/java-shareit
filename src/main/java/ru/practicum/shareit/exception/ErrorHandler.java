@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.Map;
 
-@ControllerAdvice("ru.yandex.practicum.shareit")
+@ControllerAdvice
 public class ErrorHandler {
 
     @ExceptionHandler(NotFoundException.class)
