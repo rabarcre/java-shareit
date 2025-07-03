@@ -169,7 +169,7 @@ public class BookingServiceImpl implements BookingService {
         switch (number) {
             case 1:
                 if (!booking.getItem().getOwner().getId().equals(userId)) {
-                    throw new NotFoundException("Пользователь не является владельцем");
+                    throw new ValidationException("Пользователь не является владельцем");
                 }
                 if (!booking.getStatus().equals(Status.WAITING)) {
                     throw new ValidationException("Бронь cо статусом WAITING");
@@ -178,7 +178,7 @@ public class BookingServiceImpl implements BookingService {
             case 2:
                 if (!booking.getBooker().getId().equals(userId)
                     && !booking.getItem().getOwner().getId().equals(userId)) {
-                    throw new NotFoundException("Пользователь не владелeц и не автор бронирования ");
+                    throw new ValidationException("Пользователь не владелeц и не автор бронирования ");
                 }
                 return booking;
         }
