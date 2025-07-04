@@ -2,82 +2,70 @@ package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.UniqueEmailException;
 import ru.practicum.shareit.user.UserMapper;
-import ru.practicum.shareit.user.dao.UserDao;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
-    private final UserDao userDao;
+
+    private final UserRepository userRepository;
 
     @Override
+    @Transactional
     public UserDto add(UserDto userDto) {
         User user = UserMapper.toUser(userDto);
-        checkEmail(user);
-        return UserMapper.toUserDto(userDao.add(user));
-    }
-
-    @Override
-    public UserDto update(Integer id, UserDto userDto) {
-        checkUser(id);
-        User user = new User();
-        UserDto savedUser = UserMapper.toUserDto(userDao.findUserById(id));
-
-        if (userDto.getName() != null) {
-            user.setName(userDto.getName());
-        } else {
-            user.setName(savedUser.getName());
-        }
-
-        if (userDto.getEmail() != null) {
-            checkEmail(UserMapper.toUser(userDto));
-            user.setEmail(userDto.getEmail());
-        } else {
-            user.setEmail(savedUser.getEmail());
-        }
-        user.setId(id);
-        userDao.update(id, user);
+        user = userRepository.save(user);
         return UserMapper.toUserDto(user);
     }
 
     @Override
+    @Transactional
+    public UserDto update(Integer id, UserDto userDto) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> {
+                            return new NotFoundException("Пользователя с " + id + " не существует");
+                        }
+                );
+        String name = userDto.getName();
+        if (name != null && !name.isBlank()) {
+            user.setName(name);
+        }
+        String email = userDto.getEmail();
+        if (email != null && !email.isBlank()) {
+            user.setEmail(email);
+        }
+        return UserMapper.toUserDto(user);
+    }
+
+    @Override
+    @Transactional
     public UserDto findById(Integer id) {
-        checkUser(id);
-        return UserMapper.toUserDto(userDao.findUserById(id));
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Пользователя с " + id + " не существует")
+                );
+        return UserMapper.toUserDto(user);
     }
 
     @Override
+    @Transactional
     public void delete(Integer id) {
-        checkUser(id);
-        userDao.delete(id);
+        userRepository.deleteById(id);
     }
 
     @Override
+    @Transactional
     public List<UserDto> findAll() {
-        return userDao.findAll().stream()
+        return userRepository.findAll().stream()
                 .map(UserMapper::toUserDto)
                 .collect(Collectors.toList());
-    }
-
-    private void checkEmail(User user) {
-        boolean isUnique = userDao.findAll().stream()
-                .anyMatch(thisUser -> thisUser.getEmail().equals(user.getEmail()));
-        if (isUnique) {
-            throw new UniqueEmailException("Электронная почта: " + user.getEmail() + " уже зарегестрированна");
-        }
-    }
-
-    private void checkUser(Integer id) {
-        if (userDao.findAll().stream()
-                .noneMatch(user -> user.getId().equals(id))) {
-            throw new NotFoundException("Пользователя с Id: " + id + " не существует");
-        }
     }
 }
