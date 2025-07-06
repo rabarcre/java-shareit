@@ -1,4 +1,4 @@
-package ru.practicum.shareit.request;
+package ru.practicum.shareit.request.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -7,16 +7,19 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
-
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -27,19 +30,19 @@ import java.time.LocalDateTime;
 public class ItemRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @Column(name = "description", nullable = false, length = 255)
+    private Integer id;
+    @Column(name = "description", nullable = false)
     private String description;
 
     @ManyToOne
-    @JoinColumn(name = "requestor_id")
-    @ToString.Exclude
+    @JoinColumn(name = "requestor_id", nullable = false)
     private User requester;
 
+    @CreationTimestamp
+    @Column(name = "created")
     private LocalDateTime created;
 
-    public ItemRequest(Long id, String description) {
-        this.id = id;
-        this.description = description;
-    }
+    @OneToMany
+    @JoinColumn(name = "request_id")
+    private List<Item> items = new ArrayList<>();
 }
